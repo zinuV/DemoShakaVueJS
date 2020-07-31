@@ -1,0 +1,30 @@
+<svg id="bg-home" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="720" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-opacity="0"/>
+      <stop offset="0.239" stop-opacity="0.161"/>
+      <stop offset="0.439" stop-opacity="0.49"/>
+      <stop offset="0.609"/>
+      <stop offset="1"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="0.5" x2="0.5" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-opacity="0"/>
+      <stop offset="0.243" stop-opacity="0.09"/>
+      <stop offset="0.402" stop-opacity="0.478"/>
+      <stop offset="0.598"/>
+      <stop offset="1"/>
+    </linearGradient>
+    <radialGradient id="radial-gradient" cx="1" cy="0" r="1.653" gradientTransform="matrix(-0.301, 0.953, -0.578, -0.183, 1.301, -0.953)" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-opacity="0"/>
+      <stop offset="0.22" stop-opacity="0"/>
+      <stop offset="0.998"/>
+      <stop offset="0.999"/>
+      <stop offset="1" stop-opacity="0.812"/>
+      <stop offset="1" stop-opacity="0.788"/>
+      <stop offset="1"/>
+    </radialGradient>
+  </defs>
+  <rect id="Rectangle_228" data-name="Rectangle 228" width="1280" height="720" fill="url(#linear-gradient)"/>
+  <rect id="Rectangle_227" data-name="Rectangle 227" width="720" height="1280" transform="translate(1280) rotate(90)" fill="url(#linear-gradient-2)"/>
+  <path id="Path_403" data-name="Path 403" d="M0,0H1274.317V720H0Z" transform="translate(5.683)" fill="url(#radial-gradient)"/>
+</svg>

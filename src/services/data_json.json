@@ -1,0 +1,51 @@
+[
+	{
+		"id": 1,
+		"img": "../../assets/images/icon_search.svg",
+		"img_focus": "./assets/images/icon_search_focus.svg",
+		"class_name": "search",
+		"title": "Tìm kiếm"
+	},
+	{
+		"id": 2,
+		"img": "./assets/images/icon_home.svg",
+		"img_focus": "./assets/images/icon_home_focus.svg",
+		"class_name": "home",
+		"title": "Trang chủ"
+	},
+	{
+		"id": 3,
+		"img": "./assets/images/icon_truyenhinh.svg",
+		"img_focus": "./assets/images/icon_truyenhinh_focus.svg",
+		"class_name": "television",
+		"title": "Truyền hình"
+	},
+	{
+		"id": 4,
+		"img": "./assets/images/icon_phimtruyen.svg",
+		"img_focus": "./assets/images/icon_phimtruyen_focus.svg",
+		"class_name": "film",
+		"title": "Phim truyện"
+	},
+	{
+		"id": 5,
+		"img": "./assets/images/icon_thethao.svg",
+		"img_focus": "./assets/images/icon_thethao_focus.svg",
+		"class_name": "sport",
+		"title": "Thể thao"
+	},
+	{
+		"id": 6,
+		"img": "./assets/images/icon_giaitri.svg",
+		"img_focus": "./assets/images/icon_giaitri_focus.svg",
+		"class_name": "entertainments",
+		"title": "Giải trí"
+	},
+	{
+		"id": 7,
+		"img": "./assets/images/icon_thieunhi.svg",
+		"img_focus": "./assets/images/icon_thieunhi_focus.svg",
+		"class_name": "child",
+		"title": "Thiếu nhi"
+	}
+]

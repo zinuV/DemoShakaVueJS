@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="780" viewBox="0 0 200 780">
+  <defs>
+    <linearGradient id="linear-gradient" x2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0"/>
+      <stop offset="1" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="bg_menu_thugon" x="0" y="0" width="200" height="780" filterUnits="userSpaceOnUse">
+      <feOffset dy="12" input="SourceAlpha"/>
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feFlood flood-opacity="0.678"/>
+      <feComposite operator="in" in2="blur"/>
+      <feComposite in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g id="bg_menu_thugon-2" data-name="bg_menu_thugon" transform="translate(30 18)">
+    <g transform="matrix(1, 0, 0, 1, -30, -18)" filter="url(#bg_menu_thugon)">
+      <rect id="bg_menu_thugon-3" data-name="bg_menu_thugon" width="140" height="720" transform="translate(30 18)" fill="url(#linear-gradient)"/>
+    </g>
+  </g>
+</svg>

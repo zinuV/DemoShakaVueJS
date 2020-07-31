@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="18" height="20" viewBox="0 0 18 20">
+  <defs>
+    <clipPath id="clip-icon_xemngay">
+      <rect width="18" height="20"/>
+    </clipPath>
+  </defs>
+  <g id="icon_xemngay" clip-path="url(#clip-icon_xemngay)">
+    <g id="icon_play_b" transform="translate(2 2)">
+      <path id="Path_398" data-name="Path 398" d="M13.262,6.74l-11-6.5A1.492,1.492,0,0,0,0,1.528v13a1.5,1.5,0,0,0,2.262,1.291l11-6.5a1.5,1.5,0,0,0,0-2.581Z" transform="translate(0 -0.032)" fill="#fff"/>
+    </g>
+  </g>
+</svg>

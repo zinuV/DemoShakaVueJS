@@ -1,0 +1,20 @@
+.sidebar-wrapper{
+	background-color: #303030;
+	float: left;
+	width: 12%;
+	.sidebar-item{
+		&.active{
+			background-color: #424242;
+		    border-right: 0.2rem #FED722 solid;
+		}
+		padding: 1rem 1.5rem;
+		p{
+			color: #fff;
+		}
+	}
+}
+.list-wrapper{
+	float: right;
+	padding: 0 3rem;
+	width: 88%;
+}
