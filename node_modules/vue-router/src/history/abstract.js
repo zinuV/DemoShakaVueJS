@@ -2,8 +2,7 @@
 
 import type Router from '../index'
 import { History } from './base'
-import { NavigationDuplicated } from './errors'
-import { isExtendedError } from '../util/warn'
+import { NavigationFailureType, isNavigationFailure } from '../util/errors'
 
 export class AbstractHistory extends History {
   index: number
@@ -51,7 +50,7 @@ export class AbstractHistory extends History {
         this.updateRoute(route)
       },
       err => {
-        if (isExtendedError(NavigationDuplicated, err)) {
+        if (isNavigationFailure(err, NavigationFailureType.duplicated)) {
           this.index = targetIndex
         }
       }
