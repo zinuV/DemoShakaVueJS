@@ -16,3 +16,8 @@ export default {
   components: {},
 };
 </script>
+<style>
+#app {
+  background-color: black;
+}
+</style>
