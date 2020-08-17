@@ -6,8 +6,8 @@ import MusicComponent from "../components/music/MusicComponent";
 import karaokeComponent from "../components/kara/karaokeComponent";
 import ContactComponent from "../components/contact/ContactComponent";
 import VirtualkeyComponent from "../components/virtualkey/VirtualkeyComponent";
-import HomeDemo from "../components/demo/HomeDemo";
-import MoviePlayer from "../components/demo/MoviePlayer";
+import HomeDemo from "../components/home/HomeDemo";
+import MoviePlayer from "../components/player/MoviePlayer";
 
 const routes = [{
         path: "/",
