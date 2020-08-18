@@ -2,7 +2,7 @@
   <div class="player-control" :class="{ hidePlayerControl: hidePlayerControl }">
     <div class="timeline" :class="{timelineActived:currentPos===0}">
       <div class="current-time">
-        <p>{{transTime(videoStatus.currentTime).hour}}:{{transTime(videoStatus.currentTime).minute}}:{{transTime(videoStatus.currentTime).second}}</p>
+        <p>{{transTime(videoStatus.currentTime).hour}}:{{transTime(videoStatus.currentTime).minute}}:{{transTime(videoStatus.currentTime).seconds}}</p>
       </div>
       <div
         class="timing"
@@ -16,16 +16,21 @@
       ></div>
       <div
         class="timeline-miniVideo"
-        :class="{invisible:false}"
+        v-if="controlTimeline.showMiniVideo"
         :style="{ left: timeline*9.66 - 120 + 'px' }"
       >
-        <video class="miniVideo" src="manifestUri" ref="miniVideo"></video>
+        <VideoPlayer
+          class="miniVideo"
+          :manifestUri="manifestUri"
+          :setVideoPlay="false"
+          :setVideoCurrentTime="setTimelineToSeconds"
+        />
         <div class="miniVideo-timing">
-          <!-- <p>{{Math.floor(t_timeline.setTime / 3600)}}:{{ Math.floor((t_timeline.setTime % 3600) / 60)}}:{{Math.floor(t_timeline.setTime % 60)}}</p> -->
+          <p>{{transTime(setTimelineToSeconds).hour}}:{{videoStatus.duration===0?0:transTime(setTimelineToSeconds).minute}}:{{videoStatus.duration===0?0:transTime(setTimelineToSeconds).seconds}}</p>
         </div>
       </div>
       <div class="duration-time">
-        <p>{{transTime(videoStatus.duration).hour}}:{{transTime(videoStatus.duration).minute}}:{{transTime(videoStatus.duration).second}}</p>
+        <p>{{transTime(videoStatus.duration).hour}}:{{transTime(videoStatus.duration).minute}}:{{transTime(videoStatus.duration).seconds}}</p>
       </div>
     </div>
     <div class="button-control">
@@ -73,70 +78,178 @@
 </template>
 
 <script>
+import VideoPlayer from "./VideoPlayer";
 export default {
   name: "MoviePlayerControl",
   data() {
     return {
       currentPos: 3,
       prePos: null,
-      hidePlayerControl: false,
+      hidePlayerControl: true,
+      controlTimeline: {
+        isControl: false,
+        showMiniVideo: false,
+        setTimeline: 0,
+      },
+      keypressed: false,
     };
   },
+  components: {
+    VideoPlayer,
+  },
   props: {
+    manifestUri: String,
     keyCode: Number,
     eventKey: Boolean,
     videoStatus: Object,
+    setHidePlayerControl: Boolean,
   },
   methods: {
     transTime(time) {
       return {
         hour: Math.floor(time / 3600),
         minute: Math.floor((time % 3600) / 60),
-        second: Math.floor(time % 60),
+        seconds: Math.floor(time % 60),
       };
     },
     enter() {
       switch (this.currentPos) {
+        case 0:
+          if (this.controlTimeline.isControl || this.currentPos === 0) {
+            this.$emit("setVideoCurrentTime", this.setTimelineToSeconds);
+            if (
+              this.setTimelineToSeconds != this.videoStatus.duration &&
+              !this.videoStatus.play
+            )
+              this.$emit("playVideo");
+            this.controlTimeline.isControl = false;
+            this.controlTimeline.showMiniVideo = false;
+            this.currentPos = 3;
+
+            this.hidePlayerControl = true;
+          }
+          break;
+        case 1:
+          this.$emit("openSoundSubMenu");
+          this.hidePlayerControl = true;
+          break;
+        case 2:
+          this.$emit("openSpeedMenu");
+          this.hidePlayerControl = true;
+          break;
         case 3:
-          this.$emit("playVideo");
+          if (!this.hidePlayerControl) this.$emit("playVideo");
           break;
       }
+      if (this.controlTimeline.isControl)
+        this.controlTimeline.isControl = false;
     },
   },
   watch: {
+    setHidePlayerControl: function (vNew) {
+      if (!vNew) {
+        this.$set(this, "hidePlayerControl", false);
+        this.$emit("hideMoviePlayerControl");
+      }
+    },
     eventKey: function (vNew, vOld) {
-      if (vNew != null)
+      if (vNew != null) {
         switch (this.keyCode) {
           case 37:
             //Left key pressed
             if (this.currentPos > 1)
               this.$set(this, "currentPos", this.currentPos - 1);
+            else if (this.currentPos === 0) {
+              if (this.videoStatus.play) this.$emit("playVideo");
+              this.controlTimeline.isControl = true;
+              this.controlTimeline.showMiniVideo = true;
+
+              this.controlTimeline.setTimeline - 1 >= 0
+                ? (this.controlTimeline.setTimeline -= 1)
+                : (this.controlTimeline.setTimeline = 0);
+            }
             break;
           case 38:
             //Up key pressed
-            if (this.currentPos > 0) this.$set(this, "prePos", this.currentPos);
-            this.$set(this, "currentPos", 0);
+            if (!this.hidePlayerControl) {
+              if (this.currentPos > 0)
+                this.$set(this, "prePos", this.currentPos);
+              this.$set(this, "currentPos", 0);
+            } else {
+              this.hidePlayerControl = false;
+              this.currentPos = 3;
+            }
 
             break;
           case 39:
             //Right key pressed
             if (this.currentPos < 3 && this.currentPos > 0)
               this.$set(this, "currentPos", this.currentPos + 1);
+            else if (this.currentPos === 0) {
+              if (this.videoStatus.play) this.$emit("playVideo");
+              this.controlTimeline.isControl = true;
+              this.controlTimeline.showMiniVideo = true;
+
+              this.controlTimeline.setTimeline + 1 <= 100
+                ? (this.controlTimeline.setTimeline += 1)
+                : (this.controlTimeline.setTimeline = 100);
+            }
             break;
           case 40:
             //Down key pressed
-            this.$set(this, "currentPos", this.prePos);
+            if (this.hidePlayerControl) {
+              this.hidePlayerControl = false;
+              this.currentPos = 3;
+            } else if (this.currentPos === 0) {
+              this.$set(this, "currentPos", this.prePos);
+              this.controlTimeline.showMiniVideo = false;
+            }
             break;
           case 13:
             //Enter key pressed
             this.enter();
             break;
         }
+      }
+
+      // auto hide PlayerControl after 3s
+      var self = this;
+
+      if (self.hidePlayerControl === false) {
+        self.keypressed = true;
+        let i = 0;
+        let t_hideControlPlayer = setInterval(function () {
+          if (!self.controlTimeline.showMiniVideo) {
+            if (i === 0) self.keypressed = false;
+            ++i;
+            if (self.keypressed) {
+              clearInterval(t_hideControlPlayer);
+            } else if (i === 30 && !self.hidePlayerControl) {
+              self.hidePlayerControl = true;
+              self.currentPos = 3;
+              if (self.controlTimeline.isControl)
+                self.controlTimeline.isControl = false;
+              clearInterval(t_hideControlPlayer);
+            }
+          }
+        }, 100);
+      }
     },
   },
   computed: {
     timeline: function () {
-      return (this.videoStatus.currentTime / this.videoStatus.duration) * 100;
+      if (!this.controlTimeline.isControl && this.videoStatus.duration != 0) {
+        this.controlTimeline.setTimeline =
+          (this.videoStatus.currentTime / this.videoStatus.duration) * 100;
+        return this.controlTimeline.setTimeline;
+      } else {
+        return this.controlTimeline.setTimeline;
+      }
+    },
+    setTimelineToSeconds: function () {
+      return this.videoStatus.duration === 0
+        ? 0
+        : (this.controlTimeline.setTimeline / 100) * this.videoStatus.duration;
     },
   },
   mounted() {},
@@ -208,26 +321,33 @@ export default {
 }
 .player-control .timeline-miniVideo,
 .miniVideo {
-  width: 240px;
+  width: 236px;
   height: 135px;
   border: 1px solid #000000;
   border-radius: 12px;
 }
+
 .player-control .timeline-miniVideo {
   position: relative;
   bottom: 160px;
   overflow: hidden;
 }
-
-.player-control .miniVideo-timing {
+.player-control .timeline-miniVideo .miniVideo {
   width: 240px;
-  height: 24px;
+  height: 135px;
+  position: relative;
+  right: 3px;
+}
+
+.player-control .timeline-miniVideo .miniVideo-timing {
+  width: 240px;
+  height: 25px;
   background-color: rgba(0, 0, 0, 0.85);
   position: relative;
-  bottom: 32px;
+  bottom: 27px;
   color: #ffffff;
 }
-.player-control .miniVideo-timing p {
+.player-control .timeline-miniVideo .miniVideo-timing p {
   position: relative;
   top: 4px;
 }
