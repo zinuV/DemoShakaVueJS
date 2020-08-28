@@ -8,6 +8,7 @@ import ContactComponent from "../components/contact/ContactComponent";
 import VirtualkeyComponent from "../components/virtualkey/VirtualkeyComponent";
 import HomeDemo from "../components/home/HomeDemo";
 import MoviePlayer from "../components/player/MoviePlayer";
+import Chanel from "../components/chanel/Chanel";
 
 const routes = [{
         path: "/",
@@ -18,6 +19,11 @@ const routes = [{
         path: "/movieplayer",
         name: "MoviePlayer",
         component: MoviePlayer,
+    },
+    {
+        path: "/chanel",
+        name: "Chanel",
+        component: Chanel,
     },
     {
         path: "/list",

@@ -1,7 +1,7 @@
 <template>
   <div id="home-demo">
     <div class="menu-list">
-      <img src="../../assets/images/menu.png" alt="" />
+      <img src="../../assets/images/menu.png" alt />
     </div>
     <div class="content" id="app">
       <div class="show-item">
@@ -12,16 +12,20 @@
           :style="{ right: currentPosition.y === 0 ? rightPercent + '%' : '0' }"
         >
           <div class="item" v-for="(item, index) in items" :key="index">
-            <div class="box-item" :class="{ selected: arrSelect[0][index] }">
+            <div
+              class="box-item"
+              :class="{ selected: currentPosition.y===0 && currentPosition.x ===index }"
+            >
               <img
                 :src="item.image"
                 alt=" "
-                :class="{ selectedimg: arrSelect[0][index] }"
+                :class="{ selectedimg: currentPosition.y===0 && currentPosition.x ===index }"
               />
             </div>
-            <p class="nameItem" :class="{ selectedname: arrSelect[0][index] }">
-              {{ item.title }}
-            </p>
+            <p
+              class="nameItem"
+              :class="{ selectedname: currentPosition.y===0 && currentPosition.x ===index }"
+            >{{ item.title }}</p>
           </div>
         </div>
       </div>
@@ -33,16 +37,25 @@
           :style="{ right: currentPosition.y === 1 ? rightPercent + '%' : '0' }"
         >
           <div class="item" v-for="(item, index) in items" :key="index">
-            <div class="box-item" :class="{ selected: arrSelect[1][index] }">
+            <div
+              class="box-item"
+              :class="{ selected: currentPosition.y===1 && currentPosition.x ===index }"
+            >
               <img
                 :src="item.image"
                 alt=" "
-                :class="{ selectedimg: arrSelect[1][index] }"
+                :class="{ selectedimg: currentPosition.y===1 && currentPosition.x ===index }"
               />
             </div>
-            <p class="nameItem">{{ item.title }}</p>
+            <p
+              class="nameItem"
+              :class="{ selectedname: currentPosition.y===1 && currentPosition.x ===index }"
+            >{{ item.title }}</p>
           </div>
         </div>
+      </div>
+      <div class="show-item">
+        <p class="name-list" :class="{truyenHinhSelected: currentPosition.y===2}">Truyền hình</p>
       </div>
     </div>
   </div>
@@ -50,11 +63,10 @@
 <script>
 export default {
   name: "HomeDemo",
-  data: function() {
+  data: function () {
     return {
       rightPercent: 0,
       items: [],
-      arrSelect: [],
       currentPosition: { x: 0, y: 0 },
       firstViewPosition: 0,
       api:
@@ -65,19 +77,11 @@ export default {
     var app = this;
     fetch(this.api)
       .then((response) => response.json()) // Transform the data into json
-      .then(function(data) {
+      .then(function (data) {
         app.items = data.root.item;
-        app.arrSelect = [
-          app.items.map((value, index) => {
-            return index < 1;
-          }),
-          app.items.map((index) => {
-            return false;
-          }),
-        ];
       });
 
-    document.onkeydown = function(event) {
+    document.onkeydown = function (event) {
       switch (event.keyCode) {
         case 37:
           //console.log('Left key pressed');
@@ -104,14 +108,13 @@ export default {
   },
 
   methods: {
-    updatePos: function(newPos) {
+    updatePos: function (newPos) {
       let tmpPos = Object.assign({}, this.currentPosition);
-      this.$set(this.arrSelect[tmpPos.y], tmpPos.x, false);
+
       this.currentPosition.x = newPos.x;
       this.currentPosition.y = newPos.y;
-      this.$set(this.arrSelect[newPos.y], newPos.x, true);
     },
-    up: function() {
+    up: function () {
       if (this.currentPosition.y > 0) {
         this.updatePos({
           x: 0,
@@ -121,8 +124,8 @@ export default {
         this.$set(this, "firstViewPosition", 0);
       }
     },
-    down: function() {
-      if (this.currentPosition.y < this.arrSelect.length - 1) {
+    down: function () {
+      if (this.currentPosition.y < 2) {
         this.updatePos({
           x: 0,
           y: this.currentPosition.y + 1,
@@ -131,8 +134,8 @@ export default {
         this.$set(this, "firstViewPosition", 0);
       }
     },
-    left: function() {
-      if (this.currentPosition.x > 0) {
+    left: function () {
+      if (this.currentPosition.x > 0 && this.currentPosition.y < 3) {
         this.updatePos({
           x: this.currentPosition.x - 1,
           y: this.currentPosition.y,
@@ -150,10 +153,10 @@ export default {
         }
       }
     },
-    right: function() {
+    right: function () {
       if (
-        this.currentPosition.x <
-        this.arrSelect[this.currentPosition.y].length - 1
+        this.currentPosition.x < this.items.length - 1 &&
+        this.currentPosition.y < 3
       ) {
         this.updatePos({
           x: this.currentPosition.x + 1,
@@ -170,8 +173,16 @@ export default {
         }
       }
     },
-    enter: function() {
-      this.$router.push("/movieplayer");
+    enter: function () {
+      switch (this.currentPosition.y) {
+        case 0:
+        case 1:
+          this.$router.push("/movieplayer");
+          break;
+        case 2:
+          this.$router.push("/chanel");
+          break;
+      }
     },
   },
 };
@@ -180,7 +191,7 @@ export default {
 <style>
 #home-demo {
   width: 2500px;
-  height: 1600px;
+
   background-color: black;
   color: white;
   overflow: hidden;
@@ -233,7 +244,7 @@ export default {
 }
 
 .item .box-item {
-  height: 35rem;
+  height: 34rem;
   width: 20rem;
   margin: 0 15px;
   position: relative;
@@ -247,6 +258,8 @@ export default {
   display: block;
   transition: 0.3s all ease-in-out;
   border-radius: 1rem;
+  position: relative;
+  top: 7px;
 }
 
 .list-second {
@@ -284,5 +297,8 @@ export default {
 
 .selectedname {
   opacity: 1 !important;
+}
+.truyenHinhSelected {
+  color: yellow;
 }
 </style>

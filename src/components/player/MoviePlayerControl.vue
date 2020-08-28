@@ -16,7 +16,7 @@
       ></div>
       <div
         class="timeline-miniVideo"
-        v-if="controlTimeline.showMiniVideo"
+        v-show="controlTimeline.showMiniVideo"
         :style="{ left: timeline*9.66 - 120 + 'px' }"
       >
         <VideoPlayer
@@ -35,43 +35,52 @@
     </div>
     <div class="button-control">
       <div class="control-sound-sub">
-        <button class="style-buttom" v-if="currentPos!=1">
+        <button class="style-buttom" v-show="currentPos!=1">
           <img src="../../assets/icon-control/control-sound-sub.png" alt />
         </button>
-        <button class="style-buttom buttonActived" v-else>
+        <button class="style-buttom buttonActived" v-show="currentPos===1">
           <img src="../../assets/icon-control/control-sound-sub-actived.png" alt />
         </button>
-        <p v-if="currentPos===1">Âm thanh - phụ đề</p>
+        <p v-show="currentPos===1">Âm thanh - phụ đề</p>
       </div>
       <div class="control-speed">
-        <button class="style-buttom" v-if="currentPos!=2">
+        <button class="style-buttom" v-show="currentPos!=2">
           <img src="../../assets/icon-control/control-speed.png" alt />
         </button>
-        <button class="style-buttom buttonActived" v-else>
+        <button class="style-buttom buttonActived" v-show="currentPos===2">
           <img src="../../assets/icon-control/control-speed-actived.png" alt />
         </button>
         <p :class="{ invisible: !(currentPos===2) }">Tốc độ</p>
       </div>
       <div class="control-play-pause">
-        <button class="control-pause style-buttom" v-if=" videoStatus.play && (currentPos!=3)">
+        <button class="control-pause style-buttom" v-show=" videoStatus.play && (currentPos!=3)">
           <img src="../../assets/icon-control/control-stop.png" alt />
         </button>
         <button
           class="control-pause style-buttom buttonActived"
-          v-if=" videoStatus.play && (currentPos===3)"
+          v-show=" videoStatus.play && (currentPos===3)"
         >
           <img src="../../assets/icon-control/control-stop-actived.png" alt />
         </button>
-        <button class="control-play style-buttom" v-if=" !videoStatus.play && (currentPos!=3)">
+        <button class="control-play style-buttom" v-show=" !videoStatus.play && (currentPos!=3)">
           <img src="../../assets/icon-control/control-play.png" alt />
         </button>
         <button
           class="control-play style-buttom buttonActived"
-          v-if=" !videoStatus.play && (currentPos===3)"
+          v-show=" !videoStatus.play && (currentPos===3)"
         >
           <img src="../../assets/icon-control/control-play-actived.png" alt />
         </button>
-        <p v-if=" !videoStatus.play && (currentPos===3)">Tạm Dừng</p>
+        <p v-show=" !videoStatus.play && (currentPos===3)">Tạm Dừng</p>
+      </div>
+      <div class="control-episode" v-show="typeOfMovie===0">
+        <button class="style-buttom" v-show="currentPos!=4">
+          <img src="../../assets/icon-control/control-episode.png" alt />
+        </button>
+        <button class="style-buttom buttonActived" v-show="currentPos===4">
+          <img src="../../assets/icon-control/control-episode-actived.png" alt />
+        </button>
+        <p v-show="currentPos===4">Tập phim</p>
       </div>
     </div>
   </div>
@@ -84,6 +93,7 @@ export default {
   data() {
     return {
       currentPos: 3,
+      maxPos: 4,
       prePos: null,
       hidePlayerControl: true,
       controlTimeline: {
@@ -99,6 +109,7 @@ export default {
   },
   props: {
     manifestUri: String,
+    typeOfMovie: Number,
     keyCode: Number,
     eventKey: Boolean,
     videoStatus: Object,
@@ -113,34 +124,42 @@ export default {
       };
     },
     enter() {
-      switch (this.currentPos) {
-        case 0:
-          if (this.controlTimeline.isControl || this.currentPos === 0) {
-            this.$emit("setVideoCurrentTime", this.setTimelineToSeconds);
-            if (
-              this.setTimelineToSeconds != this.videoStatus.duration &&
-              !this.videoStatus.play
-            )
-              this.$emit("playVideo");
-            this.controlTimeline.isControl = false;
-            this.controlTimeline.showMiniVideo = false;
-            this.currentPos = 3;
+      if (this.hidePlayerControl) {
+        this.hidePlayerControl = false;
+        this.currentPos = 3;
+      } else
+        switch (this.currentPos) {
+          case 0:
+            if (this.controlTimeline.isControl || this.currentPos === 0) {
+              this.$emit("setVideoCurrentTime", this.setTimelineToSeconds);
+              if (
+                this.setTimelineToSeconds != this.videoStatus.duration &&
+                !this.videoStatus.play
+              )
+                this.$emit("playVideo");
+              this.controlTimeline.isControl = false;
+              this.controlTimeline.showMiniVideo = false;
+              this.currentPos = 3;
 
+              this.hidePlayerControl = true;
+            }
+            break;
+          case 1:
+            this.$emit("openSoundSubMenu");
             this.hidePlayerControl = true;
-          }
-          break;
-        case 1:
-          this.$emit("openSoundSubMenu");
-          this.hidePlayerControl = true;
-          break;
-        case 2:
-          this.$emit("openSpeedMenu");
-          this.hidePlayerControl = true;
-          break;
-        case 3:
-          if (!this.hidePlayerControl) this.$emit("playVideo");
-          break;
-      }
+            break;
+          case 2:
+            this.$emit("openSpeedMenu");
+            this.hidePlayerControl = true;
+            break;
+          case 3:
+            if (!this.hidePlayerControl) this.$emit("playVideo");
+            break;
+          case 4:
+            this.$emit("openEpisodeMenu");
+            this.hidePlayerControl = true;
+            break;
+        }
       if (this.controlTimeline.isControl)
         this.controlTimeline.isControl = false;
     },
@@ -183,7 +202,7 @@ export default {
             break;
           case 39:
             //Right key pressed
-            if (this.currentPos < 3 && this.currentPos > 0)
+            if (this.currentPos < this.maxPos && this.currentPos > 0)
               this.$set(this, "currentPos", this.currentPos + 1);
             else if (this.currentPos === 0) {
               if (this.videoStatus.play) this.$emit("playVideo");
@@ -252,7 +271,10 @@ export default {
         : (this.controlTimeline.setTimeline / 100) * this.videoStatus.duration;
     },
   },
-  mounted() {},
+  mounted() {
+    if (this.typeOfMovie === 0) this.maxPos = 4;
+    else if (this.typeOfMovie === 1) this.maxPos = 3;
+  },
 };
 </script>
 
@@ -321,6 +343,7 @@ export default {
 }
 .player-control .timeline-miniVideo,
 .miniVideo {
+  background-color: #000000;
   width: 236px;
   height: 135px;
   border: 1px solid #000000;
@@ -385,7 +408,8 @@ export default {
 }
 .player-control .button-control .control-sound-sub,
 .control-speed,
-.control-play-pause {
+.control-play-pause,
+.control-episode {
   position: absolute;
   bottom: 0;
   width: max-content;
@@ -396,9 +420,15 @@ export default {
 .player-control .button-control .control-speed {
   left: 225px;
 }
+.player-control .button-control .control-episode {
+  left: 1083px;
+}
 .player-control .button-control .control-play-pause {
   left: 604px;
   bottom: -5px;
+}
+.player-control .button-control .control-episode p {
+  left: -13px;
 }
 .player-control .button-control p {
   position: absolute;
@@ -406,7 +436,8 @@ export default {
   width: max-content;
 }
 .player-control .button-control .control-sound-sub button,
-.control-speed button {
+.control-speed button,
+.control-episode button {
   width: 40px;
   height: 40px;
   border-radius: 20px;

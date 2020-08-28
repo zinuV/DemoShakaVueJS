@@ -63,6 +63,7 @@ export default {
             break;
           case 8:
             //BackSpace key pess
+            this.currentPos = this.t_speed;
             this.$emit("openMoviePlayerControl");
         }
       }

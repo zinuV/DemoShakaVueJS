@@ -63,6 +63,7 @@ export default {
     subList: Array,
     keyCode: Number,
     eventKey: Boolean,
+    setSoundSubVideo: Object,
   },
   watch: {
     eventKey: function (vNew, vOld) {
@@ -90,13 +91,23 @@ export default {
             } else {
               this.t_sub = this.currentPos - this.soundList.length;
             }
+            this.$emit("setSoundSubVideo", {
+              sound: this.t_sound,
+              sub: this.t_sub,
+            });
             break;
           case 8:
             //BackSpace key pess
+            this.currentPos = this.t_sound;
             this.$emit("openMoviePlayerControl");
         }
       }
     },
+  },
+  mounted() {
+    this.t_sound = this.setSoundSubVideo.sound;
+    this.t_sub = this.setSoundSubVideo.sub;
+    this.currentPos = this.t_sound;
   },
 };
 </script>

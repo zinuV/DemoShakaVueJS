@@ -11,6 +11,7 @@
 
 <script>
 const shaka = require("../../../node_modules/shaka-player/dist/shaka-player.ui.js");
+const muxjs = require("../../../node_modules/mux.js/dist/mux");
 
 export default {
   name: "VideoPlayer",
@@ -47,9 +48,11 @@ export default {
     const video = self.$refs.videoCurrent;
     const videoContainer = self.$refs.videoContainer;
     const player = new shaka.Player(video);
-
     const ui = new shaka.ui.Overlay(player, videoContainer, video);
     const controls = ui.getControls();
+
+    // Assigned muxjs
+    window.muxjs = muxjs;
 
     // Listen for error events.
     player.addEventListener("error", self.onErrorEvent);
