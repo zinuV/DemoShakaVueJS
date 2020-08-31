@@ -180,7 +180,7 @@ export default {
           this.$router.push("/movieplayer");
           break;
         case 2:
-          this.$router.push("/chanel");
+          this.$router.push("/channel");
           break;
       }
     },

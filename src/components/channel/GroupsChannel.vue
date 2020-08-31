@@ -1,10 +1,10 @@
 <template>
-  <div class="groups-chanel">
+  <div class="groups-channel">
     <h5 class="group-title">Các gói kênh</h5>
-    <div class="groups-chanel-content group-content" :style="{left: leftMove + 'px'}">
+    <div class="groups-channel-content group-content" :style="{left: leftMove + 'px'}">
       <div
-        class="group-chanel"
-        v-for="(item, index) in groupsChanel"
+        class="group-channel"
+        v-for="(item, index) in groupsChannel"
         :key="index"
         :class="{groupActived: currentPos === index, registedActived: currentPos === registered && currentPos === index}"
       >
@@ -17,7 +17,7 @@
           <img src="../../assets/icon-control/registered.png" alt />
           <p>Đã đăng ký</p>
         </div>
-        <div class="price-chanel">
+        <div class="price-channel">
           <h4 class="price">{{item.feename}}</h4>
           <p class="vat">({{item.vat_message}})</p>
         </div>
@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  name: "GroupChanel",
+  name: "GroupChannel",
   data() {
     return {
       currentPos: 0,
@@ -38,14 +38,14 @@ export default {
     };
   },
   props: {
-    groupsChanel: Array,
+    groupsChannel: Array,
     keyCode: Number,
     eventKey: Boolean,
   },
   watch: {
     eventKey: function (vNew, vOld) {
       if (vNew != null) {
-        var maxGroup = this.groupsChanel.length;
+        var maxGroup = this.groupsChannel.length;
         switch (this.keyCode) {
           case 37:
             //Left key pressed
@@ -89,14 +89,15 @@ export default {
 </script>
 
 <style>
-.groups-chanel {
+.groups-channel {
+  position: absolute;
 }
-.groups-chanel-content {
+.groups-channel-content {
   display: flex;
   margin: auto 66px;
   transition: all 0.3s ease 0s;
 }
-.group-chanel {
+.group-channel {
   width: 367px;
   height: 496px;
   background-color: rgba(255, 255, 255, 0.1);
@@ -106,23 +107,23 @@ export default {
   text-align: center;
   position: relative;
 }
-.group-chanel .logo {
+.group-channel .logo {
   height: 98px;
   width: auto;
   margin-top: 40px;
   margin-bottom: 32px;
 }
-.group-chanel .decription {
+.group-channel .decription {
   margin-bottom: 16px;
 }
-.group-chanel .group-decription {
+.group-channel .group-decription {
   margin: auto 40px;
   color: rgba(255, 255, 255, 0.5);
 }
-.group-chanel .group-decription p {
+.group-channel .group-decription p {
   line-height: 25px;
 }
-.group-chanel .registered {
+.group-channel .registered {
   display: flex;
   position: absolute;
   bottom: 160px;
@@ -130,12 +131,12 @@ export default {
   color: rgba(255, 255, 255, 0.5);
   font-style: italic;
 }
-.group-chanel .registered img {
+.group-channel .registered img {
   height: 16px;
   width: 16px;
   margin-right: 12px;
 }
-.group-chanel .price-chanel {
+.group-channel .price-channel {
   width: 287px;
   height: 104px;
   color: rgba(255, 255, 255, 0.5);
@@ -146,14 +147,14 @@ export default {
   left: 40px;
   padding: 24px;
 }
-.group-chanel .price-chanel .vat {
+.group-channel .price-channel .vat {
   font-size: 14px;
 }
-.groupActived .price-chanel {
+.groupActived .price-channel {
   background-color: #ffffff;
   color: #000000;
 }
-.registedActived .price-chanel {
-  background-color: rgba(255, 255, 255, 0.5) !important;
+.registedActived .price-channel {
+  background-color: rgba(255, 255, 255, 0.3) !important;
 }
 </style>
