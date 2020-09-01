@@ -59,7 +59,7 @@ export default {
             break;
           case 38:
             //Up key pressed
-
+            this.$emit("changeCurrentPostChannel", 0);
             break;
           case 39:
             //Right key pressed
@@ -75,7 +75,7 @@ export default {
             break;
           case 40:
             //Down key pressed
-
+            this.$emit("changeCurrentPostChannel", 1);
             break;
           case 13:
             //Enter key pressed

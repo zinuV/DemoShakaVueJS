@@ -93,11 +93,21 @@ export default {
               Math.floor(this.numColsItemChannel / 2) - 1
             )
               this.colCenter--;
+            this.colCenter < 0
+              ? (this.colCenter += this.numColsItemChannel)
+              : 0;
             break;
           case 38:
             //Up key pressed
 
             if (this.currentPos % 7 > 0) this.currentPos--;
+            else {
+              this.$emit("changeCurrentPostChannel", 0);
+              setTimeout(() => {
+                this.currentPos = 0;
+                this.colCenter = 1;
+              }, 400);
+            }
             break;
           case 39:
             //Right key pressed
@@ -115,6 +125,9 @@ export default {
               Math.floor(this.numColsItemChannel / 2) + 1
             )
               this.colCenter++;
+            this.colCenter >= this.numColsItemChannel
+              ? (this.colCenter %= this.numColsItemChannel)
+              : 0;
             break;
           case 40:
             //Down key pressed
@@ -123,6 +136,13 @@ export default {
               this.currentPos < this.dataLength - 1
             )
               this.currentPos++;
+            else {
+              this.$emit("changeCurrentPostChannel", 1);
+              setTimeout(() => {
+                this.currentPos = 0;
+                this.colCenter = 1;
+              }, 400);
+            }
             break;
           case 13:
             //Enter key pressed

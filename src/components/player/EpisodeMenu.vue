@@ -4,8 +4,8 @@
       <p class="episode-title">Tập phim</p>
       <div class="episode-range">
         <div class="episode-range-character">
-          <p :style="{height: epRangeActived === 0? 0: '100%'}">&#60;</p>
-          <p :style="{height: epRangeActived === arrayEpRangeNumber.length - 1? 0: '100%'}">&#62;</p>
+          <p :style="{height: epRangeActived === 0? 0: '100%'}">&#10092;</p>
+          <p :style="{height: epRangeActived === arrayEpRangeNumber.length - 1? 0: '100%'}">&#10093;</p>
         </div>
         <div class="episode-range-number" :style="{ left:  epRangeNumberLeft + 'px' }">
           <div
@@ -168,7 +168,7 @@ export default {
   bottom: 11px;
 }
 .episode-menu-content .episode-range .episode-range-character p {
-  font-size: 38px;
+  font-size: 32px;
   font-family: monospace;
   margin: 0 60px;
   overflow: hidden;
@@ -176,7 +176,7 @@ export default {
 .episode-menu-content .episode-range .episode-range-number {
   display: flex;
   position: absolute;
-  top: 0;
+  top: -1px;
   transition: all 0.2s ease 0s;
 }
 .episode-menu-content .episode-range .episode-range-number div {
