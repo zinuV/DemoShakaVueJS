@@ -2,7 +2,9 @@
 
 const path = require('path');
 const webpack = require('webpack');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {
+    CleanWebpackPlugin
+} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -10,15 +12,15 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 module.exports = {
     entry: [
         './src/main.js',
-        './src/assets/scss/style.scss'
+        './src/assets/scss/style.scss',
+        "babel-polyfill"
     ],
-    output:{
+    output: {
         path: path.resolve(__dirname, "./dist"),
         filename: 'bundle.min.js'
     },
     module: {
-        rules: [
-            {
+        rules: [{
                 test: /\.vue$/, //Only work with format files
                 loader: 'vue-loader'
             },
@@ -44,11 +46,9 @@ module.exports = {
             },
             {
                 test: /\.(woff(2)?|ttf|eot|otf|svg)(\?v=\d+\.\d+\.\d+)?$/, //Only work with format files
-                use: [
-                    {
-                        loader: 'file-loader'
-                    }
-                ]
+                use: [{
+                    loader: 'file-loader'
+                }]
             },
             {
                 test: /\.(svg|png|jpe?g|gif)$/, //Only work with format files

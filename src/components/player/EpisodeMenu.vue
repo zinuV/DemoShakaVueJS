@@ -4,8 +4,10 @@
       <p class="episode-title">Tập phim</p>
       <div class="episode-range">
         <div class="episode-range-character">
-          <p :style="{height: epRangeActived === 0? 0: '100%'}">&#10092;</p>
-          <p :style="{height: epRangeActived === arrayEpRangeNumber.length - 1? 0: '100%'}">&#10093;</p>
+          <p :style="{visibility: epRangeActived === 0? 'hidden': 'visible'}">&#10092;</p>
+          <p
+            :style="{visibility: epRangeActived === arrayEpRangeNumber.length - 1? 'hidden': 'visible'}"
+          >&#10093;</p>
         </div>
         <div class="episode-range-number" :style="{ left:  epRangeNumberLeft + 'px' }">
           <div
