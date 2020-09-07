@@ -1,6 +1,13 @@
 <template>
   <div class="channel">
     <div class="channel-background"></div>
+    <OverviewChannel
+      v-show="currentPos === 0"
+      :overviewChannelAPI="overviewChannel"
+      :eventKey="currentPos === 0?keyCode.eventKey:null"
+      :keyCode="currentPos === 0?keyCode.value:0"
+      @setEventKey="setEventKey"
+    />
     <BroadcastSchedule
       v-show="currentPos === 1"
       :today="today"
@@ -38,33 +45,52 @@ export default {
   },
   methods: {
     getAPI: async function (url, postJson, option) {
-      var postJsonString = JSON.stringify(postJson);
-      var result = await fetch(url, {
-        method: option,
-        mode: "cors",
-        cache: "no-cache",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        },
-        redirect: "follow",
-        referrerPolicy: "no-referrer",
-        timeout: 5000, //request timeout,
-        body: postJsonString,
-      })
-        .then((response) => response.json())
-        .then((json) => {
-          return json;
+      var result;
+      if (option == "GET" || option == "get") {
+        result = await fetch(url)
+          .then((response) => response.json())
+          .then((json) => {
+            return json;
+          })
+          .catch((error) =>
+            console.log("Authorization failed : " + error.message)
+          );
+      } else if (option == "POST" || option == "post") {
+        var postJsonString = JSON.stringify(postJson);
+        result = await fetch(url, {
+          method: option,
+          mode: "cors",
+          cache: "no-cache",
+          credentials: "same-origin",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+          },
+          redirect: "follow",
+          referrerPolicy: "no-referrer",
+          timeout: 5000, //request timeout,
+          body: postJsonString,
         })
-        .catch((error) =>
-          console.log("Authorization failed : " + error.message)
-        );
+          .then((response) => response.json())
+          .then((json) => {
+            return json;
+          })
+          .catch((error) =>
+            console.log("Authorization failed : " + error.message)
+          );
+      }
+
       return result;
+    },
+    setEventKey: function (value) {
+      this.keyCode.value = value;
     },
   },
   created() {
     var self = this;
     var GetAPI = async function () {
+      // Get Overview Channel api
+      self.overviewChannel = await self.getAPI(self.api.apiChannel, {}, "GET");
+
       // Get Broadcast schedule api
       var jsonYesterday = {
         channelid: "1",

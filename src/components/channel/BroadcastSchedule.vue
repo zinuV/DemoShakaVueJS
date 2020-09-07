@@ -7,45 +7,50 @@
     <div class="bs-time">
       <div class="bs-time-background"></div>
       <div class="bs-time-character">
-        <p :style="{visibility: bsTimeStringToNumberName === 0? 'hidden': 'visible'}">&#10092;</p>
-        <p :style="{visibility: bsTimeStringToNumberName === 2? 'hidden': 'visible'}">&#10093;</p>
+        <p :style="{visibility: currentDay === 0? 'hidden': 'visible'}">&#10092;</p>
+        <p :style="{visibility: currentDay === 2? 'hidden': 'visible'}">&#10093;</p>
       </div>
       <div class="bs-time-name" :style="{ right:  bsTimeNameRight + 'px'}">
         <p
-          :style="{visibility: bsTimeStringToNumberName === 2? 'hidden': 'visible'}"
-          :class="{bsTimeStringToNumberNameActived: bsTimeStringToNumberName === 0}"
+          :style="{visibility: currentDay === 2? 'hidden': 'visible'}"
+          :class="{currentDayActived: currentDay === 0}"
         >Hôm qua</p>
-        <p :class="{bsTimeStringToNumberNameActived: bsTimeStringToNumberName === 1}">Hôm nay</p>
+        <p :class="{currentDayActived: currentDay === 1}">Hôm nay</p>
         <p
-          :style="{visibility: bsTimeStringToNumberName === 0? 'hidden': 'visible'}"
-          :class="{bsTimeStringToNumberNameActived: bsTimeStringToNumberName === 2}"
+          :style="{visibility: currentDay === 0? 'hidden': 'visible'}"
+          :class="{currentDayActived: currentDay === 2}"
         >Ngày mai</p>
       </div>
     </div>
     <div class="bs-content">
-      <div class="bs-show-content" :style="{bottom: bsSelectorBottom + 'px'}">
+      <div
+        class="bs-show-content"
+        :style="{bottom: positionBottom + 'px', transition: keyCode===37 || keyCode===39? 'none':'all 0.3s ease 0s'}"
+      >
         <div
           class="bs-content-item"
-          v-for="(item, index) in  broadcastScheduleAPI[bsTimeStringToNumberName]"
+          v-for="(item, index) in  broadcastScheduleAPI[currentDay]"
           :key="index"
-          :class="{bsSelectorActived: index === currentPos, bsSelectorActivedCanPlay: index === currentPos && index <= showRedTimeIndex && bsTimeStringToNumberName === 1, canPlay: currentPos != index && index <= showRedTimeIndex && bsTimeStringToNumberName === 1}"
+          :class="{bsSelectorActived: index === currentPos, bsSelectorActivedCanPlay: index === currentPos && index <= redTimeIndex && currentDay === 1, canPlay: currentPos != index && index <= redTimeIndex && currentDay === 1}"
         >
           <p class="bs-content-item-time">{{item.time}}</p>
           <img
-            v-show="currentPos != index && index<showRedTimeIndex && bsTimeStringToNumberName === 1"
+            v-show="currentPos != index && index<redTimeIndex && currentDay === 1"
             class="icon-play-back"
             src="../../assets/icon-control/play-back.png"
             alt
           />
           <img
-            v-show="currentPos === index && index<showRedTimeIndex && bsTimeStringToNumberName === 1"
+            v-show="currentPos === index && index<redTimeIndex && currentDay === 1"
             class="icon-play-back"
             src="../../assets/icon-control/play-back-actived.png"
             alt
           />
-          <div v-if="index === showRedTimeIndex && bsTimeStringToNumberName === 1" class="red-time"></div>
+          <div v-if="index === redTimeIndex && currentDay === 1" class="red-time"></div>
 
-          <p class="bs-content-item-name">{{item.title}}</p>
+          <div class="bs-content-item-name" ref="itemNameActived">
+            <p>{{showItemName(item.title, index)}}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -58,15 +63,16 @@ export default {
   data() {
     return {
       currentPos: 0,
-      bsTimeStringToNumberName: 1,
-      bsSelectorBottom: 0,
+      currentDay: 1,
+      positionBottom: 0,
+      prePos: { Day: null, pos: null },
     };
   },
   props: {
     today: Date,
+    broadcastScheduleAPI: Array,
     keyCode: Number,
     eventKey: Boolean,
-    broadcastScheduleAPI: Array,
   },
   methods: {
     bsTimeStringToNumber(timeString) {
@@ -74,76 +80,124 @@ export default {
         parseInt(timeString.slice(0, 3)) * 60 + parseInt(timeString.slice(3, 5))
       );
     },
+    positionBottomFromIndex(index) {
+      if (this.broadcastScheduleAPI.length > 1) {
+        if (index <= 4) return 0;
+        else if (index >= this.broadcastScheduleAPI[this.currentDay].length - 5)
+          return (this.broadcastScheduleAPI[this.currentDay].length - 8) * 64;
+        else return (index - 4) * 64;
+      } else return 0;
+    },
+    indexFromBsTime(bsTime, bsArray) {
+      var tmp = bsArray.findIndex((item, index) => {
+        if (index + 1 < bsArray.length)
+          return (
+            this.bsTimeStringToNumber(item.time) <=
+              this.bsTimeStringToNumber(bsTime) &&
+            this.bsTimeStringToNumber(bsArray[index + 1].time) >
+              this.bsTimeStringToNumber(bsTime)
+          );
+        else
+          return (
+            this.bsTimeStringToNumber(item.time) <=
+            this.bsTimeStringToNumber(bsTime)
+          );
+      });
+      return tmp;
+    },
+    showItemName(name, index, maxLen = 50, separator = " ") {
+      if (name.length <= maxLen + 2) return name;
+      else {
+        if (index != this.currentPos)
+          return name.substr(0, name.lastIndexOf(separator, maxLen)) + "...";
+        else return name;
+      }
+    },
   },
   computed: {
     bsTimeNameRight: function () {
-      return (this.bsTimeStringToNumberName - 1) * 140;
+      return (this.currentDay - 1) * 140;
     },
 
-    setRedTimeMinute: function () {
-      return this.today.getHours() * 60 + this.today.getMinutes();
+    currentTime: function () {
+      return this.today.getHours() < 10
+        ? "0" + this.today.getHours()
+        : this.today.getHours() + ":" + this.today.getMinutes();
     },
-    showRedTimeIndex: function () {
-      if (this.broadcastScheduleAPI.length > 1) {
-        var tmp = this.broadcastScheduleAPI[1].findIndex((item, index) => {
-          if (index + 1 < this.broadcastScheduleAPI[1].length)
-            return (
-              this.bsTimeStringToNumber(item.time) < this.setRedTimeMinute &&
-              this.bsTimeStringToNumber(
-                this.broadcastScheduleAPI[1][index + 1].time
-              ) > this.setRedTimeMinute
-            );
-          else
-            return this.bsTimeStringToNumber(item.time) < this.setRedTimeMinute;
-        });
-        return tmp;
-      } else return 0;
-    },
-    redTimeBsSelectorBottom: function () {
-      if (this.broadcastScheduleAPI.length > 1) {
-        if (this.showRedTimeIndex <= 4) this.bsSelectorBottom = 0;
-        else if (
-          this.showRedTimeIndex >=
-          this.broadcastScheduleAPI[1].length - 5
-        )
-          return (this.broadcastScheduleAPI[1].length - 5) * 64;
-        else return (this.showRedTimeIndex - 4) * 64;
-      } else return 0;
+    redTimeIndex: function () {
+      return this.indexFromBsTime(
+        this.currentTime,
+        this.broadcastScheduleAPI[1]
+      );
     },
   },
 
   watch: {
     eventKey: function (vNew, vOld) {
       var maxList =
-        this.broadcastScheduleAPI[this.bsTimeStringToNumberName] != "undefine"
-          ? this.broadcastScheduleAPI[this.bsTimeStringToNumberName].length
+        this.broadcastScheduleAPI[this.currentDay] != "undefine"
+          ? this.broadcastScheduleAPI[this.currentDay].length
           : 0;
       if (vNew != null) {
         switch (this.keyCode) {
           case 37:
             //Left key pressed
-            if (this.bsTimeStringToNumberName > 0)
-              this.bsTimeStringToNumberName--;
+            if (this.currentDay > 0) {
+              var tmpPreDay = this.prePos.day;
+              var tmpPrePos = this.prePos.pos;
+              this.prePos = {
+                day: this.currentDay,
+                pos: this.currentPos,
+              };
+              this.currentDay--;
+              if (this.currentDay === tmpPreDay) {
+                this.currentPos = tmpPrePos;
+              } else {
+                var tmpTime = this.broadcastScheduleAPI[this.prePos.day][
+                  this.currentPos
+                ].time;
+                this.currentPos = this.indexFromBsTime(
+                  tmpTime,
+                  this.broadcastScheduleAPI[this.currentDay]
+                );
+              }
+            }
             break;
           case 38:
             //Up key pressed
             if (this.currentPos > 0) {
               this.currentPos--;
-              if (this.currentPos > 3 && this.currentPos < maxList - 4)
-                this.bsSelectorBottom -= 64;
+              this.prePos.day = null;
             }
             break;
           case 39:
             //Right key pressed
-            if (this.bsTimeStringToNumberName < 2)
-              this.bsTimeStringToNumberName++;
+            if (this.currentDay < 2) {
+              var tmpDay = this.prePos.day;
+              var tmpPrePos = this.prePos.pos;
+              this.prePos = {
+                day: this.currentDay,
+                pos: this.currentPos,
+              };
+              this.currentDay++;
+              if (this.currentDay === tmpDay) {
+                this.currentPos = tmpPrePos;
+              } else {
+                var tmpTime = this.broadcastScheduleAPI[this.prePos.day][
+                  this.currentPos
+                ].time;
+                this.currentPos = this.indexFromBsTime(
+                  tmpTime,
+                  this.broadcastScheduleAPI[this.currentDay]
+                );
+              }
+            }
             break;
           case 40:
             //Down key pressed
             if (this.currentPos < maxList - 1) {
               this.currentPos++;
-              if (this.currentPos > 4 && this.currentPos < maxList - 3)
-                this.bsSelectorBottom += 64;
+              this.prePos.day = null;
             }
             break;
           case 13:
@@ -157,11 +211,18 @@ export default {
         }
       }
     },
+    broadcastScheduleAPI: function () {
+      if (this.broadcastScheduleAPI.length > 1) {
+        this.currentPos = this.redTimeIndex;
+        this.positionBottom = this.positionBottomFromIndex(this.currentPos);
+      }
+    },
+    currentPos: function () {
+      this.positionBottom = this.positionBottomFromIndex(this.currentPos);
+    },
   },
   created() {
     var self = this;
-    self.currentPos = self.showRedTimeIndex;
-    self.bsSelectorBottom = self.redTimeBsSelectorBottom;
   },
 };
 </script>
@@ -225,7 +286,7 @@ export default {
   top: 18px;
   color: rgba(255, 255, 255, 0.4);
 }
-.bsTimeStringToNumberNameActived {
+.currentDayActived {
   font-size: 22px !important;
   top: 16px !important;
   color: #ffffff !important;
@@ -251,11 +312,16 @@ export default {
 .bs-content .bs-show-content .bs-content-item p {
   margin: 20px 0;
   position: absolute;
+  width: max-content;
 }
 .bs-content .bs-show-content .bs-content-item .bs-content-item-time {
   left: 32px;
 }
 .bs-content .bs-show-content .bs-content-item .bs-content-item-name {
+  width: 505px;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
   left: 131px;
 }
 .bs-content .bs-show-content .bs-content-item .icon-play-back {

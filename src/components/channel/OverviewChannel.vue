@@ -11,16 +11,16 @@
     <ListItemChannel
       :title="'Danh sách kênh tổng hợp'"
       :listItemChannelProp="synthesisChannel"
-      :eventKey="currentPos === 0?keyCode.eventKey:null"
-      :keyCode="currentPos === 0?keyCode.value:0"
+      :eventKey="currentPos === 0?eventKey:null"
+      :keyCode="currentPos === 0?keyCode:0"
       @changeCurrentPostChannel="changeCurrentPostChannel"
       :class="{component: currentPos === 0 || prePos === 0}"
       :style="{top: componentTop(0)+'px'}"
     />
     <GroupsChannel
       :groupsChannel="groupsChannel"
-      :eventKey="currentPos === 1?keyCode.eventKey:null"
-      :keyCode="currentPos === 1?keyCode.value:0"
+      :eventKey="currentPos === 1?eventKey:null"
+      :keyCode="currentPos === 1?keyCode:0"
       @changeCurrentPostChannel="changeCurrentPostChannel"
       :class="{component: currentPos === 1 || prePos === 1}"
       :style="{top: componentTop(1)+'px'}"
@@ -29,8 +29,8 @@
     <ListItemChannel
       :title="'Danh sách kênh cá nhân'"
       :listItemChannelProp="individualChannel"
-      :eventKey="currentPos === 2?keyCode.eventKey:null"
-      :keyCode="currentPos === 2?keyCode.value:0"
+      :eventKey="currentPos === 2?eventKey:null"
+      :keyCode="currentPos === 2?keyCode:0"
       @changeCurrentPostChannel="changeCurrentPostChannel"
       :class="{component: currentPos === 2 || prePos === 2}"
       :style="{top: componentTop(2)+'px'}"
@@ -46,7 +46,7 @@ export default {
   name: "OverviewChannel",
   data() {
     return {
-      currentPos: 3,
+      currentPos: 1,
       prePos: 0,
       listTitle: [
         "Các gói kênh",
@@ -58,11 +58,6 @@ export default {
         down: "Danh sách kênh cá nhân",
         show: true,
       },
-      keyCode: { value: null, eventKey: false },
-
-      api:
-        "https://api.fbox.fpt.vn/fboxapi/iptv/getchannel/v1/404A030430C1/SGDN00017/2704564/90/2704564/en/VDSL/0/0/1?st=hqWajCcuqSfaTOiCL0qBnw&expires=91957457191&pf=1",
-
       groupsChannel: [],
       synthesisChannel: [],
       individualChannel: [],
@@ -72,23 +67,10 @@ export default {
     GroupsChannel,
     ListItemChannel,
   },
-  created() {
-    var app = this;
-    fetch(app.api.apiChannel)
-      .then((response) => response.json())
-      .then(function (data) {
-        app.groupsChannel = data.root.itemgroup;
-
-        app.synthesisChannel = data.root.itemlist;
-        app.individualChannel = data.root.itemlist;
-      });
-  },
-  mounted() {
-    var self = this;
-    document.onkeydown = function (event) {
-      self.keyCode.value = event.keyCode;
-      self.keyCode.eventKey = !self.keyCode.eventKey;
-    };
+  props: {
+    overviewChannelAPI: Object,
+    keyCode: Number,
+    eventKey: Boolean,
   },
   methods: {
     vitrualPos(pos) {
@@ -103,7 +85,7 @@ export default {
     },
 
     changeCurrentPostChannel(value) {
-      this.keyCode.eventKey = null;
+      this.$emit("setEventKey", null);
       var tmpPos = this.currentPos;
       if (value === 0) {
         tmpPos--;
@@ -134,6 +116,15 @@ export default {
           this.instruction.up = this.listTitle[0];
           this.instruction.down = this.listTitle[1];
           break;
+      }
+    },
+  },
+  watch: {
+    overviewChannelAPI: function () {
+      if (this.overviewChannelAPI != null) {
+        this.groupsChannel = this.overviewChannelAPI.root.itemgroup;
+        this.synthesisChannel = this.overviewChannelAPI.root.itemlist;
+        this.individualChannel = this.overviewChannelAPI.root.itemlist;
       }
     },
   },
