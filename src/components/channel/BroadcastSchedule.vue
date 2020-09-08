@@ -1,8 +1,6 @@
 <template>
   <div class="broadcast-schedule">
-    <div
-      class="bs-title"
-    >VTV1 - Lịch phát sóng ngày {{today.getDate()}}/{{today.getMonth()+1}}/{{today.getFullYear()}}</div>
+    <div class="bs-title">VTV1 - Lịch phát sóng ngày {{dayTitle}}</div>
 
     <div class="bs-time">
       <div class="bs-time-background"></div>
@@ -48,8 +46,11 @@
           />
           <div v-if="index === redTimeIndex && currentDay === 1" class="red-time"></div>
 
-          <div class="bs-content-item-name" ref="itemNameActived">
-            <p>{{showItemName(item.title, index)}}</p>
+          <div class="bs-content-item-name">
+            <p
+              :class="index != currentPos?'bsItemName':'bsItemNameActived'"
+              :ref="checkIndex(index)? 'bsItemNameActived':null"
+            >{{showItemName(item.title, index)}}</p>
           </div>
         </div>
       </div>
@@ -66,6 +67,8 @@ export default {
       currentDay: 1,
       positionBottom: 0,
       prePos: { Day: null, pos: null },
+      redTimeIndex: 0,
+      keySetItemName: -1,
     };
   },
   props: {
@@ -113,22 +116,44 @@ export default {
         else return name;
       }
     },
+    checkIndex(index) {
+      if (index === this.currentPos) this.keySetItemName = index;
+      return index === this.currentPos;
+    },
   },
   computed: {
+    dayTitle: function () {
+      var tmpDay = this.today;
+      switch (this.currentDay) {
+        case 0:
+          tmpDay.setDate(tmpDay.getDate() - 1);
+          break;
+        case 2:
+          tmpDay.setDate(tmpDay.getDate() + 1);
+          break;
+      }
+      return (
+        tmpDay.getDate() +
+        "/" +
+        (tmpDay.getMonth() + 1) +
+        "/" +
+        tmpDay.getFullYear()
+      );
+    },
     bsTimeNameRight: function () {
       return (this.currentDay - 1) * 140;
     },
 
     currentTime: function () {
-      return this.today.getHours() < 10
-        ? "0" + this.today.getHours()
-        : this.today.getHours() + ":" + this.today.getMinutes();
-    },
-    redTimeIndex: function () {
-      return this.indexFromBsTime(
-        this.currentTime,
-        this.broadcastScheduleAPI[1]
-      );
+      var tmpHours =
+        this.today.getHours() < 10
+          ? "0" + this.today.getHours()
+          : this.today.getHours();
+      var tmpMinutes =
+        this.today.getMinutes() < 10
+          ? "0" + this.today.getMinutes()
+          : this.today.getMinutes();
+      return tmpHours + ":" + tmpMinutes;
     },
   },
 
@@ -213,6 +238,11 @@ export default {
     },
     broadcastScheduleAPI: function () {
       if (this.broadcastScheduleAPI.length > 1) {
+        this.redTimeIndex = this.indexFromBsTime(
+          this.currentTime,
+          this.broadcastScheduleAPI[1]
+        );
+
         this.currentPos = this.redTimeIndex;
         this.positionBottom = this.positionBottomFromIndex(this.currentPos);
       }
@@ -220,9 +250,41 @@ export default {
     currentPos: function () {
       this.positionBottom = this.positionBottomFromIndex(this.currentPos);
     },
+    keySetItemName: function () {
+      var item = this.$refs.bsItemNameActived[0];
+      // item.setAttribute("style", "left: -" + item.clientWidth + "px;");
+      // setTimeout(() => {
+      //   item.setAttribute(
+      //     "style",
+      //     "left: -" + item.clientWidth + "px; transition: all 9s ease 0s;"
+      //   );
+      // }, 3000);
+      console.log(this.$refs.bsItemNameActived[0].className);
+      var count = 0;
+      var tmp = setInterval(() => {
+        count++;
+        console.log(count);
+
+        if (count >= 3) {
+          item.setAttribute(
+            "style",
+            "left: -" + item.clientWidth + "px; transition: all 9s ease 0s;"
+          );
+          clearInterval(tmp);
+        }
+      }, 1000);
+    },
   },
   created() {
     var self = this;
+  },
+  mounted() {
+    // console.log("first: ", this.$refs.bsItemNameActived[0]);
+    // setTimeout(() => {
+    //   // var tmp = this.$refs.bsItemNameActived[0];
+    //   // tmp.setAttribute("style", "left: -400px; transition: all 5s ease 0s;");
+    //   console.log("second: ", this.$refs.bsItemNameActived[0]);
+    // }, 5000);
   },
 };
 </script>
@@ -323,6 +385,15 @@ export default {
   overflow: hidden;
   position: absolute;
   left: 131px;
+}
+.bs-content .bs-show-content .bs-content-item .bs-content-item-name p {
+  left: 0;
+}
+.bsItemName {
+  left: 0 !important;
+  transition: none !important;
+}
+.bsItemNameActived {
 }
 .bs-content .bs-show-content .bs-content-item .icon-play-back {
   width: 16px;
