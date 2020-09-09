@@ -1,6 +1,6 @@
 <template>
   <div class="broadcast-schedule">
-    <div class="bs-title">VTV1 - Lịch phát sóng ngày {{dayTitle}}</div>
+    <div class="bs-title">{{title}} - Lịch phát sóng ngày {{dayTitle}}</div>
 
     <div class="bs-time">
       <div class="bs-time-background"></div>
@@ -48,7 +48,7 @@
 
           <div class="bs-content-item-name">
             <p
-              :class="index != currentPos?'bsItemName':'bsItemNameActived'"
+              :style="index != currentPos? 'left: 0; transition: none': ''"
               :ref="checkIndex(index)? 'bsItemNameActived':null"
             >{{showItemName(item.title, index)}}</p>
           </div>
@@ -76,6 +76,7 @@ export default {
     broadcastScheduleAPI: Array,
     keyCode: Number,
     eventKey: Boolean,
+    title: String,
   },
   methods: {
     bsTimeStringToNumber(timeString) {
@@ -123,7 +124,7 @@ export default {
   },
   computed: {
     dayTitle: function () {
-      var tmpDay = this.today;
+      var tmpDay = new Date();
       switch (this.currentDay) {
         case 0:
           tmpDay.setDate(tmpDay.getDate() - 1);
@@ -132,10 +133,13 @@ export default {
           tmpDay.setDate(tmpDay.getDate() + 1);
           break;
       }
+
       return (
-        tmpDay.getDate() +
+        (tmpDay.getDate() < 10 ? "0" + tmpDay.getDate() : tmpDay.getDate()) +
         "/" +
-        (tmpDay.getMonth() + 1) +
+        (tmpDay.getMonth() < 9
+          ? "0" + (tmpDay.getMonth() + 1)
+          : tmpDay.getMonth() + 1) +
         "/" +
         tmpDay.getFullYear()
       );
@@ -231,7 +235,7 @@ export default {
             break;
           case 8:
             //BackSpace key pess
-
+            this.$emit("changeCurrentPost", 0);
             break;
         }
       }
@@ -250,29 +254,64 @@ export default {
     currentPos: function () {
       this.positionBottom = this.positionBottomFromIndex(this.currentPos);
     },
-    keySetItemName: function () {
-      var item = this.$refs.bsItemNameActived[0];
-      // item.setAttribute("style", "left: -" + item.clientWidth + "px;");
-      // setTimeout(() => {
-      //   item.setAttribute(
-      //     "style",
-      //     "left: -" + item.clientWidth + "px; transition: all 9s ease 0s;"
-      //   );
-      // }, 3000);
-      console.log(this.$refs.bsItemNameActived[0].className);
-      var count = 0;
-      var tmp = setInterval(() => {
-        count++;
-        console.log(count);
+    keySetItemName: function (vNew, vOld) {
+      if (this.broadcastScheduleAPI[this.currentDay][vNew].title.length > 52) {
+        var item = this.$refs.bsItemNameActived[0];
+        console.log(item);
+        var count = 0;
+        var setItemNameTransition = setInterval(() => {
+          count++;
+          if (vNew != this.currentPos) clearInterval(setItemNameTransition);
+          else {
+            var timeTransition = 0.019 * item.clientWidth;
+            if (count >= 1 && vNew === this.currentPos) {
+              item.setAttribute(
+                "style",
+                "left: -" +
+                  (item.clientWidth + 2) +
+                  "px; transition: all " +
+                  timeTransition +
+                  "s linear 0s;"
+              );
 
-        if (count >= 3) {
-          item.setAttribute(
-            "style",
-            "left: -" + item.clientWidth + "px; transition: all 9s ease 0s;"
-          );
-          clearInterval(tmp);
-        }
-      }, 1000);
+              setTimeout(() => {
+                item.setAttribute("style", "left: 505px; transition: none;");
+                item.setAttribute(
+                  "style",
+                  "left: -" +
+                    (item.clientWidth + 5) +
+                    "px; transition: all " +
+                    (timeTransition + 10) +
+                    "s linear 0s;"
+                );
+
+                if (vNew === this.currentPos) {
+                  var loop = setInterval(() => {
+                    if (vNew != this.currentPos) {
+                      clearInterval(loop);
+                    } else {
+                      item.setAttribute(
+                        "style",
+                        "left: 505px; transition: none;"
+                      );
+                      item.setAttribute(
+                        "style",
+                        "left: -" +
+                          (item.clientWidth + 5) +
+                          "px; transition: all " +
+                          (timeTransition + 10) +
+                          "s linear 0s;"
+                      );
+                    }
+                  }, (timeTransition + 10) * 1000);
+                }
+              }, timeTransition * 1000);
+            }
+
+            clearInterval(setItemNameTransition);
+          }
+        }, 1000);
+      }
     },
   },
   created() {
@@ -295,6 +334,8 @@ export default {
   height: 100%;
   position: absolute;
   top: 0px;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.6);
 }
 .bs-title {
   font-size: 38px;

@@ -29,7 +29,7 @@ export default {
 .item-channel {
   width: 378px;
   height: 64px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   display: flex;
   position: relative;

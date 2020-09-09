@@ -14,6 +14,7 @@
       :eventKey="currentPos === 0?eventKey:null"
       :keyCode="currentPos === 0?keyCode:0"
       @changeCurrentPostChannel="changeCurrentPostChannel"
+      @openBroadcastSchedule="openBroadcastSchedule"
       :class="{component: currentPos === 0 || prePos === 0}"
       :style="{top: componentTop(0)+'px'}"
     />
@@ -32,6 +33,7 @@
       :eventKey="currentPos === 2?eventKey:null"
       :keyCode="currentPos === 2?keyCode:0"
       @changeCurrentPostChannel="changeCurrentPostChannel"
+      @openBroadcastSchedule="openBroadcastSchedule"
       :class="{component: currentPos === 2 || prePos === 2}"
       :style="{top: componentTop(2)+'px'}"
     />
@@ -118,6 +120,9 @@ export default {
           break;
       }
     },
+    openBroadcastSchedule: function (value) {
+      this.$emit("openBroadcastSchedule", value);
+    },
   },
   watch: {
     overviewChannelAPI: function () {
@@ -132,6 +137,14 @@ export default {
 </script>
 
 <style>
+.overview-channel {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.6);
+}
 .group-title {
   width: max-content;
   position: absolute;

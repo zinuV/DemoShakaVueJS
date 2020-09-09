@@ -7,13 +7,20 @@
       :eventKey="currentPos === 0?keyCode.eventKey:null"
       :keyCode="currentPos === 0?keyCode.value:0"
       @setEventKey="setEventKey"
+      @openBroadcastSchedule="openBroadcastSchedule"
     />
     <BroadcastSchedule
       v-show="currentPos === 1"
+      :title="broadcastScheduleTitle"
       :today="today"
       :broadcastScheduleAPI="broadcastSchedule"
       :eventKey="currentPos === 1?keyCode.eventKey:null"
       :keyCode="currentPos === 1?keyCode.value:0"
+      @changeCurrentPost="changeCurrentPost"
+    />
+    <ChannelPlayer
+      :eventKey="currentPos === 2?keyCode.eventKey:null"
+      :keyCode="currentPos === 2?keyCode.value:0"
     />
   </div>
 </template>
@@ -22,11 +29,12 @@
 import "regenerator-runtime/runtime";
 import OverviewChannel from "./OverviewChannel";
 import BroadcastSchedule from "./BroadcastSchedule";
+import ChannelPlayer from "./ChannelPlayer";
 export default {
   name: "Channel",
   data() {
     return {
-      currentPos: 1,
+      currentPos: 0,
       keyCode: { value: null, eventKey: false },
       today: new Date(),
       api: {
@@ -37,11 +45,14 @@ export default {
       },
       overviewChannel: {},
       broadcastSchedule: [],
+      broadcastScheduleOpen: 0,
+      broadcastScheduleTitle: "",
     };
   },
   components: {
     OverviewChannel,
     BroadcastSchedule,
+    ChannelPlayer,
   },
   methods: {
     getAPI: async function (url, postJson, option) {
@@ -84,12 +95,30 @@ export default {
     setEventKey: function (value) {
       this.keyCode.value = value;
     },
+    openBroadcastSchedule: function (value) {
+      this.currentPos = 1;
+      this.broadcastScheduleOpen = value;
+    },
+    changeCurrentPost: function (value) {
+      this.currentPos = value;
+    },
+  },
+  watch: {
+    broadcastScheduleOpen: function (vNew, vOld) {
+      this.broadcastScheduleTitle = this.overviewChannel.root.itemlist[
+        vNew
+      ].channelname;
+    },
   },
   created() {
     var self = this;
     var GetAPI = async function () {
       // Get Overview Channel api
       self.overviewChannel = await self.getAPI(self.api.apiChannel, {}, "GET");
+      self.broadcastScheduleTitle =
+        self.overviewChannel.root.itemlist[
+          self.broadcastScheduleOpen
+        ].channelname;
 
       // Get Broadcast schedule api
       var jsonYesterday = {

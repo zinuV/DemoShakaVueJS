@@ -146,7 +146,7 @@ export default {
             break;
           case 13:
             //Enter key pressed
-
+            this.$emit("openBroadcastSchedule", this.currentPos);
             break;
         }
       }

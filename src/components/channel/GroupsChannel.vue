@@ -100,7 +100,7 @@ export default {
 .group-channel {
   width: 367px;
   height: 496px;
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.2);
   margin: 0 12px;
 
   border-radius: 10px;
