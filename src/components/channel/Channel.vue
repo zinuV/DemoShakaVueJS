@@ -96,8 +96,54 @@ export default {
       this.keyCode.value = value;
     },
     openBroadcastSchedule: function (value) {
-      this.currentPos = 1;
-      this.broadcastScheduleOpen = value;
+      var self = this;
+      self.currentPos = 1;
+
+      if (self.broadcastScheduleOpen != value) {
+        self.broadcastScheduleOpen = value;
+        self.broadcastScheduleTitle =
+          self.overviewChannel.root.itemlist[
+            self.broadcastScheduleOpen
+          ].channelname;
+        var GetAPI = async function () {
+          self.broadcastSchedule = [];
+          // Get Broadcast schedule api
+          var jsonYesterday = {
+            channelid: "1",
+            date: "2020/08/06",
+          };
+          var jsonToday = {
+            channelid: "1",
+            date: "2020/08/07",
+          };
+          var jsonTomorrow = {
+            channelid: "1",
+            date: "2020/08/08",
+          };
+          var getYesterdayAPI = await self.getAPI(
+            self.api.apiBroadcastSchedule,
+            jsonYesterday,
+            "POST"
+          );
+          var getTodayAPI = await self.getAPI(
+            self.api.apiBroadcastSchedule,
+            jsonToday,
+            "POST"
+          );
+          var getTomorrowAPI = await self.getAPI(
+            self.api.apiBroadcastSchedule,
+            jsonTomorrow,
+            "POST"
+          );
+
+          self.broadcastSchedule = [
+            getYesterdayAPI.items[0].schedule,
+            getTodayAPI.items[1].schedule,
+            getTomorrowAPI.items[2].schedule,
+          ];
+        };
+        GetAPI();
+      }
     },
     changeCurrentPost: function (value) {
       this.currentPos = value;
@@ -115,45 +161,6 @@ export default {
     var GetAPI = async function () {
       // Get Overview Channel api
       self.overviewChannel = await self.getAPI(self.api.apiChannel, {}, "GET");
-      self.broadcastScheduleTitle =
-        self.overviewChannel.root.itemlist[
-          self.broadcastScheduleOpen
-        ].channelname;
-
-      // Get Broadcast schedule api
-      var jsonYesterday = {
-        channelid: "1",
-        date: "2020/08/06",
-      };
-      var jsonToday = {
-        channelid: "1",
-        date: "2020/08/07",
-      };
-      var jsonTomorrow = {
-        channelid: "1",
-        date: "2020/08/08",
-      };
-      var getYesterdayAPI = await self.getAPI(
-        self.api.apiBroadcastSchedule,
-        jsonYesterday,
-        "POST"
-      );
-      var getTodayAPI = await self.getAPI(
-        self.api.apiBroadcastSchedule,
-        jsonToday,
-        "POST"
-      );
-      var getTomorrowAPI = await self.getAPI(
-        self.api.apiBroadcastSchedule,
-        jsonTomorrow,
-        "POST"
-      );
-
-      self.broadcastSchedule = [
-        getYesterdayAPI.items,
-        getTodayAPI.items,
-        getTomorrowAPI.items,
-      ];
     };
     GetAPI();
   },

@@ -34,14 +34,14 @@
           <p class="bs-content-item-time">{{item.time}}</p>
           <img
             v-show="currentPos != index && index<redTimeIndex && currentDay === 1"
-            class="icon-play-back"
-            src="../../assets/icon-control/play-back.png"
+            class="icon-review"
+            src="../../assets/icon-control/review.png"
             alt
           />
           <img
             v-show="currentPos === index && index<redTimeIndex && currentDay === 1"
-            class="icon-play-back"
-            src="../../assets/icon-control/play-back-actived.png"
+            class="icon-review"
+            src="../../assets/icon-control/review-actived.png"
             alt
           />
           <div v-if="index === redTimeIndex && currentDay === 1" class="red-time"></div>
@@ -49,7 +49,7 @@
           <div class="bs-content-item-name">
             <p
               :style="index != currentPos? 'left: 0; transition: none': ''"
-              :ref="checkIndex(index)? 'bsItemNameActived':null"
+              :ref=" 'bsItemName'+index"
             >{{showItemName(item.title, index)}}</p>
           </div>
         </div>
@@ -68,7 +68,8 @@ export default {
       positionBottom: 0,
       prePos: { Day: null, pos: null },
       redTimeIndex: 0,
-      keySetItemName: -1,
+      keySetItemName: 0,
+      keypressed: false,
     };
   },
   props: {
@@ -117,9 +118,82 @@ export default {
         else return name;
       }
     },
-    checkIndex(index) {
-      if (index === this.currentPos) this.keySetItemName = index;
-      return index === this.currentPos;
+
+    setItemNameTransition: function () {
+      var self = this;
+      self.keypressed = true;
+
+      var tmpPos = self.currentPos;
+      self.keySetItemName++;
+      if (self.keySetItemName > 255) self.keySetItemName = 0;
+      var key = self.keySetItemName;
+
+      let count = 0;
+      let countTime = setInterval(function () {
+        if (count === 0) self.keypressed = false;
+        ++count;
+        if (self.keypressed) {
+          clearInterval(countTime);
+        } else if (count >= 10) {
+          ///
+          if (
+            self.broadcastScheduleAPI[self.currentDay][self.currentPos].title
+              .length > 52
+          ) {
+            var item = self.$refs["bsItemName" + self.currentPos][0];
+            var timeTransition = 0.019 * item.clientWidth;
+
+            item.setAttribute(
+              "style",
+              "left: -" +
+                (item.clientWidth + 2) +
+                "px; transition: all " +
+                timeTransition +
+                "s linear 0s;"
+            );
+            // console.log(tmpPos, " - 1 - First run ...", item);
+
+            setTimeout(() => {
+              if (self.currentPos === tmpPos && key === self.keySetItemName) {
+                item.setAttribute("style", "left: 505px; transition: none;");
+                item.setAttribute(
+                  "style",
+                  "left: -" +
+                    (item.clientWidth + 5) +
+                    "px; transition: all " +
+                    (timeTransition + 10) +
+                    "s linear 0s;"
+                );
+                // console.log(tmpPos, " - 2 - Second run ...", item);
+
+                var loop = setInterval(() => {
+                  if (self.currentPos != tmpPos || key != self.keySetItemName) {
+                    clearInterval(loop);
+                    // console.log(tmpPos, " - 2 - Clear Loop #####", item);
+                  } else {
+                    item.setAttribute(
+                      "style",
+                      "left: 505px; transition: none;"
+                    );
+                    item.setAttribute(
+                      "style",
+                      "left: -" +
+                        (item.clientWidth + 5) +
+                        "px; transition: all " +
+                        (timeTransition + 10) +
+                        "s linear 0s;"
+                    );
+                    // console.log(tmpPos, " - 3 - Loop run ...", item);
+                  }
+                }, (timeTransition + 10) * 1000);
+              }
+            }, timeTransition * 1000);
+          }
+
+          clearInterval(countTime);
+          // console.log(tmpPos, "Stop Count**********");
+        }
+      }, 100);
     },
   },
   computed: {
@@ -164,7 +238,7 @@ export default {
   watch: {
     eventKey: function (vNew, vOld) {
       var maxList =
-        this.broadcastScheduleAPI[this.currentDay] != "undefine"
+        this.broadcastScheduleAPI[this.currentDay] != undefined
           ? this.broadcastScheduleAPI[this.currentDay].length
           : 0;
       if (vNew != null) {
@@ -190,13 +264,22 @@ export default {
                   this.broadcastScheduleAPI[this.currentDay]
                 );
               }
+
+              //itemName
+              var item = this.$refs["bsItemName" + this.currentPos][0];
+              item.setAttribute("style", "left: 0px; transition: none;");
+              this.setItemNameTransition();
             }
+
             break;
           case 38:
             //Up key pressed
             if (this.currentPos > 0) {
               this.currentPos--;
               this.prePos.day = null;
+
+              //itemName
+              this.setItemNameTransition();
             }
             break;
           case 39:
@@ -220,13 +303,22 @@ export default {
                   this.broadcastScheduleAPI[this.currentDay]
                 );
               }
+
+              //itemName
+              var item = this.$refs["bsItemName" + this.currentPos][0];
+              item.setAttribute("style", "left: 0px; transition: none;");
+              this.setItemNameTransition();
             }
+
             break;
           case 40:
             //Down key pressed
             if (this.currentPos < maxList - 1) {
               this.currentPos++;
               this.prePos.day = null;
+
+              //itemName
+              this.setItemNameTransition();
             }
             break;
           case 13:
@@ -248,70 +340,12 @@ export default {
         );
 
         this.currentPos = this.redTimeIndex;
+        this.currentDay = 1;
         this.positionBottom = this.positionBottomFromIndex(this.currentPos);
       }
     },
     currentPos: function () {
       this.positionBottom = this.positionBottomFromIndex(this.currentPos);
-    },
-    keySetItemName: function (vNew, vOld) {
-      if (this.broadcastScheduleAPI[this.currentDay][vNew].title.length > 52) {
-        var item = this.$refs.bsItemNameActived[0];
-        console.log(item);
-        var count = 0;
-        var setItemNameTransition = setInterval(() => {
-          count++;
-          if (vNew != this.currentPos) clearInterval(setItemNameTransition);
-          else {
-            var timeTransition = 0.019 * item.clientWidth;
-            if (count >= 1 && vNew === this.currentPos) {
-              item.setAttribute(
-                "style",
-                "left: -" +
-                  (item.clientWidth + 2) +
-                  "px; transition: all " +
-                  timeTransition +
-                  "s linear 0s;"
-              );
-
-              setTimeout(() => {
-                item.setAttribute("style", "left: 505px; transition: none;");
-                item.setAttribute(
-                  "style",
-                  "left: -" +
-                    (item.clientWidth + 5) +
-                    "px; transition: all " +
-                    (timeTransition + 10) +
-                    "s linear 0s;"
-                );
-
-                if (vNew === this.currentPos) {
-                  var loop = setInterval(() => {
-                    if (vNew != this.currentPos) {
-                      clearInterval(loop);
-                    } else {
-                      item.setAttribute(
-                        "style",
-                        "left: 505px; transition: none;"
-                      );
-                      item.setAttribute(
-                        "style",
-                        "left: -" +
-                          (item.clientWidth + 5) +
-                          "px; transition: all " +
-                          (timeTransition + 10) +
-                          "s linear 0s;"
-                      );
-                    }
-                  }, (timeTransition + 10) * 1000);
-                }
-              }, timeTransition * 1000);
-            }
-
-            clearInterval(setItemNameTransition);
-          }
-        }, 1000);
-      }
     },
   },
   created() {
@@ -436,7 +470,7 @@ export default {
 }
 .bsItemNameActived {
 }
-.bs-content .bs-show-content .bs-content-item .icon-play-back {
+.bs-content .bs-show-content .bs-content-item .icon-review {
   width: 16px;
   height: 16px;
   margin: 23px 0;
