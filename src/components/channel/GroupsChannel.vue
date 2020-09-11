@@ -41,6 +41,7 @@ export default {
     groupsChannel: Array,
     keyCode: Number,
     eventKey: Boolean,
+    openOverviewFromPlayer: Boolean,
   },
   watch: {
     eventKey: function (vNew, vOld) {
@@ -59,7 +60,7 @@ export default {
             break;
           case 38:
             //Up key pressed
-            this.$emit("changeCurrentPostChannel", 0);
+            this.$emit("changeCurrentPosChannel", 0);
             break;
           case 39:
             //Right key pressed
@@ -75,11 +76,15 @@ export default {
             break;
           case 40:
             //Down key pressed
-            this.$emit("changeCurrentPostChannel", 1);
+            this.$emit("changeCurrentPosChannel", 1);
             break;
           case 13:
             //Enter key pressed
 
+            break;
+          case 8:
+            //Back Space press
+            if (this.openOverviewFromPlayer) this.$emit("changeCurrentPos", 2);
             break;
         }
       }

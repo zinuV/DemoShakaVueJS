@@ -13,8 +13,10 @@
       :listItemChannelProp="synthesisChannel"
       :eventKey="currentPos === 0?eventKey:null"
       :keyCode="currentPos === 0?keyCode:0"
-      @changeCurrentPostChannel="changeCurrentPostChannel"
+      :openOverviewFromPlayer="openOverviewFromPlayer"
+      @changeCurrentPosChannel="changeCurrentPosChannel"
       @openBroadcastSchedule="openBroadcastSchedule"
+      @changeCurrentPos="changeCurrentPos"
       :class="{component: currentPos === 0 || prePos === 0}"
       :style="{top: componentTop(0)+'px'}"
     />
@@ -22,7 +24,9 @@
       :groupsChannel="groupsChannel"
       :eventKey="currentPos === 1?eventKey:null"
       :keyCode="currentPos === 1?keyCode:0"
-      @changeCurrentPostChannel="changeCurrentPostChannel"
+      :openOverviewFromPlayer="openOverviewFromPlayer"
+      @changeCurrentPosChannel="changeCurrentPosChannel"
+      @changeCurrentPos="changeCurrentPos"
       :class="{component: currentPos === 1 || prePos === 1}"
       :style="{top: componentTop(1)+'px'}"
     />
@@ -32,8 +36,10 @@
       :listItemChannelProp="individualChannel"
       :eventKey="currentPos === 2?eventKey:null"
       :keyCode="currentPos === 2?keyCode:0"
-      @changeCurrentPostChannel="changeCurrentPostChannel"
+      :openOverviewFromPlayer="openOverviewFromPlayer"
+      @changeCurrentPosChannel="changeCurrentPosChannel"
       @openBroadcastSchedule="openBroadcastSchedule"
+      @changeCurrentPos="changeCurrentPos"
       :class="{component: currentPos === 2 || prePos === 2}"
       :style="{top: componentTop(2)+'px'}"
     />
@@ -73,6 +79,7 @@ export default {
     overviewChannelAPI: Object,
     keyCode: Number,
     eventKey: Boolean,
+    openOverviewFromPlayer: Boolean,
   },
   methods: {
     vitrualPos(pos) {
@@ -86,7 +93,7 @@ export default {
       return (this.vitrualPos(pos) - 1) * 720;
     },
 
-    changeCurrentPostChannel(value) {
+    changeCurrentPosChannel(value) {
       this.$emit("setEventKey", null);
       var tmpPos = this.currentPos;
       if (value === 0) {
@@ -122,6 +129,9 @@ export default {
     },
     openBroadcastSchedule: function (value) {
       this.$emit("openBroadcastSchedule", value);
+    },
+    changeCurrentPos() {
+      this.$emit("changeCurrentPos", 2);
     },
   },
   watch: {

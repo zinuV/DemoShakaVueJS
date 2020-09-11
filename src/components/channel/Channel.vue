@@ -6,21 +6,29 @@
       :overviewChannelAPI="overviewChannel"
       :eventKey="currentPos === 0?keyCode.eventKey:null"
       :keyCode="currentPos === 0?keyCode.value:0"
+      :openOverviewFromPlayer="openOverviewFromPlayer"
       @setEventKey="setEventKey"
       @openBroadcastSchedule="openBroadcastSchedule"
+      @changeCurrentPos="changeCurrentPos"
     />
     <BroadcastSchedule
       v-show="currentPos === 1"
+      :showBs="currentPos === 1?true:false"
       :title="broadcastScheduleTitle"
       :today="today"
       :broadcastScheduleAPI="broadcastSchedule"
       :eventKey="currentPos === 1?keyCode.eventKey:null"
       :keyCode="currentPos === 1?keyCode.value:0"
-      @changeCurrentPost="changeCurrentPost"
+      :openBroadcastScheduleFromPlayer="openBroadcastScheduleFromPlayer"
+      @changeCurrentPos="changeCurrentPos"
+      @openChannelPlayer="openChannelPlayer"
+      @openOverviewChannel="openOverviewChannel"
     />
     <ChannelPlayer
       :eventKey="currentPos === 2?keyCode.eventKey:null"
       :keyCode="currentPos === 2?keyCode.value:0"
+      :infor="channelPlaying"
+      @changeCurrentPos="changeCurrentPos"
     />
   </div>
 </template>
@@ -45,8 +53,11 @@ export default {
       },
       overviewChannel: {},
       broadcastSchedule: [],
-      broadcastScheduleOpen: 0,
+      broadcastScheduleOpen: -1,
       broadcastScheduleTitle: "",
+      openOverviewFromPlayer: false,
+      openBroadcastScheduleFromPlayer: false,
+      channelPlaying: {},
     };
   },
   components: {
@@ -98,7 +109,8 @@ export default {
     openBroadcastSchedule: function (value) {
       var self = this;
       self.currentPos = 1;
-
+      self.keyCode.value = null;
+      if (value == null) value = self.broadcastScheduleOpen;
       if (self.broadcastScheduleOpen != value) {
         self.broadcastScheduleOpen = value;
         self.broadcastScheduleTitle =
@@ -108,45 +120,39 @@ export default {
         var GetAPI = async function () {
           self.broadcastSchedule = [];
           // Get Broadcast schedule api
-          var jsonYesterday = {
+          var jsonObject = {
             channelid: "1",
-            date: "2020/08/06",
           };
-          var jsonToday = {
-            channelid: "1",
-            date: "2020/08/07",
-          };
-          var jsonTomorrow = {
-            channelid: "1",
-            date: "2020/08/08",
-          };
-          var getYesterdayAPI = await self.getAPI(
+
+          var getData = await self.getAPI(
             self.api.apiBroadcastSchedule,
-            jsonYesterday,
-            "POST"
-          );
-          var getTodayAPI = await self.getAPI(
-            self.api.apiBroadcastSchedule,
-            jsonToday,
-            "POST"
-          );
-          var getTomorrowAPI = await self.getAPI(
-            self.api.apiBroadcastSchedule,
-            jsonTomorrow,
+            jsonObject,
             "POST"
           );
 
           self.broadcastSchedule = [
-            getYesterdayAPI.items[0].schedule,
-            getTodayAPI.items[1].schedule,
-            getTomorrowAPI.items[2].schedule,
+            getData.items[0].schedule,
+            getData.items[1].schedule,
+            getData.items[2].schedule,
           ];
         };
         GetAPI();
       }
     },
-    changeCurrentPost: function (value) {
+    openOverviewChannel: function () {
+      this.currentPos = 0;
+      this.keyCode.value = null;
+    },
+    openChannelPlayer(value) {
+      this.currentPos = 2;
+      this.keyCode.value = null;
+      this.channelPlaying = value;
+    },
+    changeCurrentPos: function (value) {
       this.currentPos = value;
+      this.keyCode.value = null;
+      if (value === 0) this.openOverviewFromPlayer = true;
+      if (value === 1) this.openBroadcastScheduleFromPlayer = true;
     },
   },
   watch: {

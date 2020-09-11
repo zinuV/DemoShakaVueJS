@@ -78,6 +78,8 @@ export default {
     keyCode: Number,
     eventKey: Boolean,
     title: String,
+    openBroadcastScheduleFromPlayer: Boolean,
+    showBs: Boolean,
   },
   methods: {
     bsTimeStringToNumber(timeString) {
@@ -121,12 +123,19 @@ export default {
 
     setItemNameTransition: function () {
       var self = this;
+
       self.keypressed = true;
 
       var tmpPos = self.currentPos;
       self.keySetItemName++;
       if (self.keySetItemName > 255) self.keySetItemName = 0;
       var key = self.keySetItemName;
+      if (
+        self.broadcastScheduleAPI[self.currentDay] == undefined ||
+        self.broadcastScheduleAPI[self.currentDay][self.currentPos] == undefined
+      ) {
+        return -1;
+      }
 
       let count = 0;
       let countTime = setInterval(function () {
@@ -141,6 +150,7 @@ export default {
               .length > 52
           ) {
             var item = self.$refs["bsItemName" + self.currentPos][0];
+
             var timeTransition = 0.019 * item.clientWidth;
 
             item.setAttribute(
@@ -253,6 +263,9 @@ export default {
                 pos: this.currentPos,
               };
               this.currentDay--;
+              if (this.broadcastScheduleAPI[this.currentDay] == undefined)
+                break;
+
               if (this.currentDay === tmpPreDay) {
                 this.currentPos = tmpPrePos;
               } else {
@@ -266,9 +279,13 @@ export default {
               }
 
               //itemName
-              var item = this.$refs["bsItemName" + this.currentPos][0];
-              item.setAttribute("style", "left: 0px; transition: none;");
-              this.setItemNameTransition();
+              if (this.$refs["bsItemName" + this.currentPos] != undefined) {
+                var item = this.$refs["bsItemName" + this.currentPos][0];
+                if (item == undefined) break;
+
+                item.setAttribute("style", "left: 0px; transition: none;");
+                this.setItemNameTransition();
+              }
             }
 
             break;
@@ -279,7 +296,8 @@ export default {
               this.prePos.day = null;
 
               //itemName
-              this.setItemNameTransition();
+              if (this.$refs["bsItemName" + this.currentPos] != undefined)
+                this.setItemNameTransition();
             }
             break;
           case 39:
@@ -292,6 +310,8 @@ export default {
                 pos: this.currentPos,
               };
               this.currentDay++;
+              if (this.broadcastScheduleAPI[this.currentDay] == undefined)
+                break;
               if (this.currentDay === tmpDay) {
                 this.currentPos = tmpPrePos;
               } else {
@@ -305,9 +325,12 @@ export default {
               }
 
               //itemName
-              var item = this.$refs["bsItemName" + this.currentPos][0];
-              item.setAttribute("style", "left: 0px; transition: none;");
-              this.setItemNameTransition();
+              if (this.$refs["bsItemName" + this.currentPos] != undefined) {
+                var item = this.$refs["bsItemName" + this.currentPos][0];
+                if (item == undefined) break;
+                item.setAttribute("style", "left: 0px; transition: none;");
+                this.setItemNameTransition();
+              }
             }
 
             break;
@@ -318,16 +341,34 @@ export default {
               this.prePos.day = null;
 
               //itemName
-              this.setItemNameTransition();
+              if (this.$refs["bsItemName" + this.currentPos] != undefined)
+                this.setItemNameTransition();
             }
             break;
           case 13:
             //Enter key pressed
+            var tmpItem = {
+              title: this.broadcastScheduleAPI[this.currentDay][this.currentPos]
+                .title,
+              time: this.broadcastScheduleAPI[this.currentDay][this.currentPos]
+                .time,
+              day: this.currentDay,
+            };
+            this.$emit("openChannelPlayer", tmpItem);
+            //itemName
+            if (this.$refs["bsItemName" + this.currentPos] != undefined) {
+              var item = this.$refs["bsItemName" + this.currentPos][0];
+              if (item == undefined) break;
+              item.setAttribute("style", "left: 0px; transition: none;");
 
+              this.keySetItemName++;
+            }
             break;
           case 8:
             //BackSpace key pess
-            this.$emit("changeCurrentPost", 0);
+            if (this.openBroadcastScheduleFromPlayer)
+              this.$emit("changeCurrentPos", 2);
+            else this.$emit("openOverviewChannel");
             break;
         }
       }
@@ -347,18 +388,18 @@ export default {
     currentPos: function () {
       this.positionBottom = this.positionBottomFromIndex(this.currentPos);
     },
+    showBs: function (value) {
+      if (value) {
+        //itemName
+        if (this.$refs["bsItemName" + this.currentPos] != undefined)
+          this.setItemNameTransition();
+      }
+    },
   },
   created() {
     var self = this;
   },
-  mounted() {
-    // console.log("first: ", this.$refs.bsItemNameActived[0]);
-    // setTimeout(() => {
-    //   // var tmp = this.$refs.bsItemNameActived[0];
-    //   // tmp.setAttribute("style", "left: -400px; transition: all 5s ease 0s;");
-    //   console.log("second: ", this.$refs.bsItemNameActived[0]);
-    // }, 5000);
-  },
+  mounted() {},
 };
 </script>
 

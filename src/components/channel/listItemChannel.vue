@@ -38,6 +38,7 @@ export default {
     listItemChannelProp: Array,
     keyCode: Number,
     eventKey: Boolean,
+    openOverviewFromPlayer: Boolean,
   },
   computed: {
     dataLength: function () {
@@ -102,7 +103,7 @@ export default {
 
             if (this.currentPos % 7 > 0) this.currentPos--;
             else {
-              this.$emit("changeCurrentPostChannel", 0);
+              this.$emit("changeCurrentPosChannel", 0);
               setTimeout(() => {
                 this.currentPos = 0;
                 this.colCenter = 1;
@@ -137,7 +138,7 @@ export default {
             )
               this.currentPos++;
             else {
-              this.$emit("changeCurrentPostChannel", 1);
+              this.$emit("changeCurrentPosChannel", 1);
               setTimeout(() => {
                 this.currentPos = 0;
                 this.colCenter = 1;
@@ -146,7 +147,12 @@ export default {
             break;
           case 13:
             //Enter key pressed
+
             this.$emit("openBroadcastSchedule", this.currentPos);
+            break;
+          case 8:
+            //Back Space press
+            if (this.openOverviewFromPlayer) this.$emit("changeCurrentPos", 2);
             break;
         }
       }
