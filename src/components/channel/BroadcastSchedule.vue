@@ -55,6 +55,9 @@
         </div>
       </div>
     </div>
+    <div class="none-data" v-show="noneData[currentDay]">
+      <p>Chưa có lịch phát sóng.</p>
+    </div>
   </div>
 </template>
 
@@ -70,6 +73,7 @@ export default {
       redTimeIndex: 0,
       keySetItemName: 0,
       keypressed: false,
+      noneData: [false, false, false],
     };
   },
   props: {
@@ -263,7 +267,10 @@ export default {
                 pos: this.currentPos,
               };
               this.currentDay--;
-              if (this.broadcastScheduleAPI[this.currentDay] == undefined)
+              if (
+                this.broadcastScheduleAPI[this.currentDay] == undefined ||
+                this.broadcastScheduleAPI[this.currentDay].length <= 0
+              )
                 break;
 
               if (this.currentDay === tmpPreDay) {
@@ -310,7 +317,10 @@ export default {
                 pos: this.currentPos,
               };
               this.currentDay++;
-              if (this.broadcastScheduleAPI[this.currentDay] == undefined)
+              if (
+                this.broadcastScheduleAPI[this.currentDay] == undefined ||
+                this.broadcastScheduleAPI[this.currentDay].length <= 0
+              )
                 break;
               if (this.currentDay === tmpDay) {
                 this.currentPos = tmpPrePos;
@@ -347,6 +357,11 @@ export default {
             break;
           case 13:
             //Enter key pressed
+            if (
+              this.broadcastScheduleAPI[this.currentDay][this.currentPos] ==
+              undefined
+            )
+              break;
             var tmpItem = {
               title: this.broadcastScheduleAPI[this.currentDay][this.currentPos]
                 .title,
@@ -373,12 +388,12 @@ export default {
         }
       }
     },
-    broadcastScheduleAPI: function () {
-      if (this.broadcastScheduleAPI.length > 1) {
-        this.redTimeIndex = this.indexFromBsTime(
-          this.currentTime,
-          this.broadcastScheduleAPI[1]
-        );
+    broadcastScheduleAPI: function (vNew) {
+      this.noneData = vNew.map((value) => {
+        return value.length > 0 ? false : true;
+      });
+      if (vNew.length > 1) {
+        this.redTimeIndex = this.indexFromBsTime(this.currentTime, vNew[1]);
 
         this.currentPos = this.redTimeIndex;
         this.currentDay = 1;
@@ -411,6 +426,11 @@ export default {
   top: 0px;
   z-index: 100;
   background-color: rgba(0, 0, 0, 0.6);
+}
+.none-data {
+  position: relative;
+  top: 35%;
+  font-size: 20px;
 }
 .bs-title {
   font-size: 38px;
